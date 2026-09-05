@@ -1,0 +1,16 @@
+node_modules
+dist
+.next
+.vinext
+.wrangler
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+coverage
+outputs
+work
+*.log
+*.sql
+*.docx
