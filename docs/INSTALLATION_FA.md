@@ -4,8 +4,8 @@
 
 ## اجزای تحویل
 
-- بستهٔ برنامه با نام `translator-lab-1.0.0-rc.1.zip`
-- تصویرهای آمادهٔ داکر با نام `translator-lab-docker-images-1.0.0-rc.1.tar`
+- بستهٔ برنامه با نام `translator-lab-1.0.0-rc.2.zip`
+- تصویرهای آمادهٔ داکر با نام `translator-lab-docker-images-1.0.0-rc.2.tar`
 - فایل کنترل صحت با پسوند `.sha256`
 - دو مدل محلی `qwen/qwen3.5-9b` و `qwen3.5-4b`
 - فایل پشتیبان تأییدشدهٔ کارفرما برای بازیابی اولیه
@@ -51,7 +51,7 @@ TRANSLATION_ALLOW_API_APPLY=false
 اگر سرور به اینترنت دسترسی ندارد، تصویرهای داکر را پیش از اجرا وارد کنید:
 
 ```powershell
-docker load --input .\translator-lab-docker-images-1.0.0-rc.1.tar
+docker load --input .\translator-lab-docker-images-1.0.0-rc.2.tar
 ```
 
 سپس سرویس‌ها را اجرا کنید:

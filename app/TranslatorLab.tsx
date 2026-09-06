@@ -251,6 +251,9 @@ function buildMapLabels(features: MapFeature[], view: ViewBounds): MapLabel[] {
 
 export default function TranslatorLab() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [dataSource, setDataSource] = useState<"loading" | "live" | "backup" | "error">("loading");
+  const [dataLoadedAt, setDataLoadedAt] = useState("");
+  const [dataReload, setDataReload] = useState(0);
   const [viewBounds, setViewBounds] = useState<ViewBounds>([7.398, -43.758, .054, .041]);
   const [selected, setSelected] = useState<MapFeature | null>(null);
   const [query, setQuery] = useState("");
@@ -301,14 +304,17 @@ export default function TranslatorLab() {
     };
 
     const loadDataset = async () => {
+      setDataSource("loading");
       let payload: Dataset;
       let sourceMessage: string;
+      let source: "live" | "backup" = "live";
       try {
         payload = await readDataset(liveFeaturesEndpoint());
         sourceMessage = "از پایگاه‌دادهٔ زنده خوانده شد";
       } catch {
         if (cancelled) return;
         payload = await readDataset("/data/map-data.json");
+        source = "backup";
         sourceMessage = "از نسخهٔ ثابت پشتیبان خوانده شد؛ سرویس زنده در دسترس نیست";
       }
 
@@ -324,15 +330,20 @@ export default function TranslatorLab() {
       const bounds = datasetBounds(hydrated);
       fullView.current = bounds;
       setDataset(hydrated);
+      setDataSource(source);
+      setDataLoadedAt(new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date()));
       setViewBounds(bounds);
       setNotice(`${hydrated.meta.stats.total.toLocaleString("fa-IR")} رکورد ${sourceMessage}.`);
     };
 
     loadDataset().catch(() => {
-      if (!cancelled) setNotice("خواندن داده‌های زنده و نسخهٔ پشتیبان ناموفق بود.");
+      if (!cancelled) {
+        setDataSource("error");
+        setNotice("خواندن داده‌های زنده و نسخهٔ پشتیبان ناموفق بود.");
+      }
     });
     return () => { cancelled = true; controller.abort(); };
-  }, []);
+  }, [dataReload]);
 
   const refreshServiceStatus = useCallback(async () => {
     try {
@@ -358,7 +369,12 @@ export default function TranslatorLab() {
       setWorkerStatus(worker); setServiceQueue(queue.summary); setTranslationMemory(memory);
       setCanonicalPlaces(canonical); setGeographicIdentityAudit(identityAudit); setOsmIdentityEnrichment(enrichment);
       setLanguageReadiness(readiness); setServiceStatusError("");
-    } catch { setServiceStatusError("وضعیت سرویس در دسترس نیست"); }
+    } catch {
+      setServiceStatusError("وضعیت سرویس در دسترس نیست");
+      setWorkerStatus(null); setServiceQueue(null); setTranslationMemory(null);
+      setCanonicalPlaces(null); setGeographicIdentityAudit(null); setOsmIdentityEnrichment(null);
+      setLanguageReadiness(null);
+    }
   }, []);
 
   const openConnectionManager = async () => {
@@ -814,11 +830,21 @@ export default function TranslatorLab() {
 
   return <main className="lab-shell">
     <header className="topbar">
-      <div><p className="eyebrow">محیط کنترل محلی</p><h1>آزمایشگاه ترجمهٔ نام‌های نقشه</h1></div>
-      <div className="top-actions"><div className="scan-status" aria-live="polite"><span className="status-dot"/><span>{notice}</span></div>
+      <div><p className="eyebrow">داشبورد مدیریت · اجرای محلی</p><h1>سامانه مترجم عوارض نقشه</h1></div>
+      <div className="top-actions">
         <button className="connection-open" onClick={() => void openConnectionManager()}>اتصال به پایگاه داده</button>
         <button className="full-file-open" onClick={() => setFullFileOpen(true)}>پردازش فایل کامل</button></div>
     </header>
+    <div className={`source-status is-${dataSource}`} role="status">
+      <div><strong>{dataSource === "backup" ? "نمایش نسخهٔ پشتیبان؛ ارتباط با پایگاه داده برقرار نیست"
+        : dataSource === "live" ? "داده‌های پایگاه دادهٔ متصل" : dataSource === "error" ? "دریافت داده ناموفق بود" : "در حال دریافت داده‌ها…"}</strong>
+        <span>{dataSource === "backup" ? "آمار و نقشه مربوط به نسخهٔ پشتیبان همراه برنامه و پیش‌نویس‌های همین مرورگر هستند؛ وضعیت فایل تأییدشدهٔ کارفرما را نشان نمی‌دهند."
+          : dataSource === "live" ? "آمار و نقشه بر اساس آخرین دریافت و پیش‌نویس‌های همین مرورگر نمایش داده می‌شوند." : "وضعیت اتصال و دریافت اطلاعات در این بخش نمایش داده می‌شود."}
+          {dataLoadedAt && ` زمان دریافت در این صفحه: ${dataLoadedAt}؛ زمان تولید منبع مشخص نیست.`}</span></div>
+      <button className="quiet-button" disabled={dataSource === "loading"} onClick={() => {
+        setDataReload((value) => value + 1); void refreshServiceStatus();
+      }}>{dataSource === "loading" ? "در حال دریافت…" : "تلاش مجدد و تازه‌سازی"}</button>
+    </div>
     <section className="metric-row" aria-label="خلاصه وضعیت داده‌ها">
       <article><span>کل رکوردها</span><strong>{stats.total.toLocaleString("fa-IR")}</strong></article>
       <article><span>دارای نام</span><strong>{stats.named.toLocaleString("fa-IR")}</strong></article>
@@ -826,31 +852,36 @@ export default function TranslatorLab() {
       <article className="metric-success"><span>ترجمه‌شده</span><strong>{stats.translated.toLocaleString("fa-IR")}</strong></article>
       <article><span>بدون نام مبدأ</span><strong>{stats.noSource.toLocaleString("fa-IR")}</strong></article>
     </section>
+    <details className="service-details">
+      <summary><strong>جزئیات وضعیت سامانه</strong><span>{serviceStatusError ? "ارتباط با سرویس برقرار نیست"
+        : !workerStatus ? "در حال دریافت وضعیت…" : workerStatus.running ? "پردازش در حال اجرا"
+        : workerStatus.automaticApply ? "ثبت خودکار محدود فعال است" : "حالت بازبینی دستی"}
+        {" · مدل، واژه‌نامه و آمادگی زبان‌ها"}</span></summary>
     <section className={`worker-strip ${workerStatus?.automaticApply ? "is-automatic" : "is-review"}`}
       aria-label="وضعیت سرویس ترجمه" aria-live="polite">
       <div className="worker-heading"><span className={`worker-pulse ${workerStatus?.running ? "is-running" : ""}`}/>
-        <span><strong>پویشگر ترجمه</strong><small>{serviceStatusError || (workerStatus?.running ? "در حال پردازش" : "آماده")}</small></span></div>
-      <div><span>حالت اجرا</span><strong>{workerStatus?.automaticApply ? "ثبت خودکار محدود" : "بازبینی دستی"}</strong></div>
-      <div><span>صف فعلی</span><strong>{serviceQueue ? `${serviceQueue.uniqueNames.toLocaleString("fa-IR")} نام یکتا` : "در حال خواندن"}</strong></div>
-      <div><span>مدل فعال</span><strong><bdi>{workerStatus?.provider.model || "تنظیم نشده"}</bdi></strong>
-        <small>{workerStatus?.provider.configured ? "آمادهٔ فراخوانی" : "نیازمند تنظیم"}</small></div>
+        <span><strong>پویشگر ترجمه</strong><small>{serviceStatusError || (!workerStatus ? "در حال دریافت وضعیت" : workerStatus.running ? "در حال پردازش" : "آماده")}</small></span></div>
+      <div><span>حالت اجرا</span><strong>{!workerStatus ? "نامشخص" : workerStatus.automaticApply ? "ثبت خودکار محدود" : "بازبینی دستی"}</strong></div>
+      <div><span>صف فعلی</span><strong>{serviceQueue ? `${serviceQueue.uniqueNames.toLocaleString("fa-IR")} نام یکتا` : serviceStatusError ? "در دسترس نیست" : "در حال خواندن"}</strong></div>
+      <div><span>مدل فعال</span><strong><bdi>{workerStatus?.provider.model || (serviceStatusError ? "نامشخص" : "در حال دریافت")}</bdi></strong>
+        <small>{!workerStatus ? "وضعیت مدل دریافت نشده" : workerStatus.provider.configured ? "پیکربندی شده" : "نیازمند تنظیم"}</small></div>
       <div><span>حافظهٔ تأییدشده</span><strong>{translationMemory?.loaded
-        ? `${translationMemory.entries.toLocaleString("fa-IR")} ترجمه` : "در حال خواندن"}</strong>
+        ? `${translationMemory.entries.toLocaleString("fa-IR")} ترجمه` : serviceStatusError ? "در دسترس نیست" : "در حال خواندن"}</strong>
         <small>{canonicalPlaces?.loaded
           ? `${canonicalPlaces.entries.toLocaleString("fa-IR")} نام معیار؛ ${canonicalPlaces.coordinates?.toLocaleString("fa-IR") || "۰"} مکان دارای مختصات؛ آزمون ۲۵ کیلومتری: ${canonicalPlaces.coordinateEvaluation?.runs?.["25"]?.wrong.toLocaleString("fa-IR") ?? "—"} خطا`
           : translationMemory?.loaded && !translationMemory.conflicts ? "بدون تعارض" : "نیازمند بررسی"}</small></div>
       <div><span>{workerStatus?.lastAppliedRun ? "آخرین تغییر" : "آخرین اجرا"}</span><strong>{workerLastActivity?.finishedAt
         ? new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(workerLastActivity.finishedAt))
-        : "هنوز اجرا نشده"}</strong>{workerStatus?.lastAppliedRun?.persistence?.updated
+        : !workerStatus ? "نامشخص" : "هنوز اجرا نشده"}</strong>{workerStatus?.lastAppliedRun?.persistence?.updated
           ? <small>{workerStatus.lastAppliedRun.persistence.updated.toLocaleString("fa-IR")} رکورد ثبت شد</small> : null}</div>
       <div><span>ممیزی مکانی دادهٔ واقعی</span><strong>{geographicIdentityAudit
         ? `${geographicIdentityAudit.summary.resolved.toLocaleString("fa-IR")} تطبیق از ${geographicIdentityAudit.summary.scanned.toLocaleString("fa-IR")}`
-        : "در حال بررسی"}</strong><small>{geographicIdentityAudit
+        : serviceStatusError ? "در دسترس نیست" : "در حال بررسی"}</strong><small>{geographicIdentityAudit
           ? `${geographicIdentityAudit.summary.mismatched.toLocaleString("fa-IR")} اختلاف؛ ${geographicIdentityAudit.summary.orthographicVariants.toLocaleString("fa-IR")} تفاوت نوشتاری؛ فقط‌خواندنی`
           : "بدون تغییر پایگاه داده"}</small></div>
       <div><span>غنی‌سازی شناسه‌های مکانی</span><strong>{osmIdentityEnrichment
         ? `${osmIdentityEnrichment.summary.identifiersFound.toLocaleString("fa-IR")} شناسه از ${osmIdentityEnrichment.summary.snapshotMatches.toLocaleString("fa-IR")} عارضه`
-        : "در حال بررسی"}</strong><small>{osmIdentityEnrichment
+        : serviceStatusError ? "در دسترس نیست" : "در حال بررسی"}</strong><small>{osmIdentityEnrichment
           ? `${osmIdentityEnrichment.summary.resolvedNames.toLocaleString("fa-IR")} متصل؛ ${osmIdentityEnrichment.summary.approvedMemoryResolved.toLocaleString("fa-IR")} از حافظهٔ کارفرما؛ ${osmIdentityEnrichment.summary.missingCanonicalName.toLocaleString("fa-IR")} بدون نام فارسی معتبر؛ فقط‌خواندنی`
           : "پیش‌نمایش بستهٔ محلی"}</small></div>
       <button className="worker-refresh" onClick={() => void refreshServiceStatus()}>به‌روزرسانی وضعیت</button>
@@ -880,7 +911,7 @@ export default function TranslatorLab() {
       <div className="language-readiness-heading"><span><strong>آمادگی زبان‌ها</strong>
         <small>{languageReadiness
           ? `${languageReadiness.modelEvaluation.summary.acceptable.toLocaleString("fa-IR")} پاسخ قابل‌قبول از ${languageReadiness.modelEvaluation.summary.samples.toLocaleString("fa-IR")} آزمون مدل`
-          : "در حال خواندن آزمون‌های پایه"}</small></span>
+          : serviceStatusError ? "نتایج آزمون‌ها در دسترس نیست" : "در حال خواندن آزمون‌های پایه"}</small></span>
         <b className="approval-lock">درج خودکار بسته است</b></div>
       <div className="language-readiness-list">{languageReadiness?.languages.map((language) =>
         <article key={language.language} className={language.status === "quality_gap" ? "has-gap" : "baseline-passed"}>
@@ -892,6 +923,8 @@ export default function TranslatorLab() {
         </article>)}</div>
       <p>موارد پوشش‌نداده‌شده باید با مدل آفلاین آزموده شوند. پس از آن نیز تأیید روی دادهٔ واقعی کارفرما برای ثبت خودکار لازم است.</p>
     </section>
+    </details>
+    <div className="activity-notice" role="status">{notice}</div>
     <section className="workspace">
       <aside className="data-panel">
         <div className="panel-heading"><div><p className="eyebrow">فهرست عوارض</p><h2>کنترل رکوردها</h2></div>
@@ -902,11 +935,13 @@ export default function TranslatorLab() {
             {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
             <select value={layerFilter} onChange={(event) => setLayerFilter(event.target.value)} aria-label="فیلتر لایه"><option value="all">همه لایه‌ها</option>
               {dataset && Object.keys(dataset.meta.layers).map((layer) => <option key={layer} value={layer}>{layer}</option>)}</select></div></div>
+        <div className="export-actions"><button className="quiet-button" onClick={exportSqlPatch}>دریافت خروجی تغییرات</button></div>
+        <details className="test-tools"><summary>ابزارهای آزمون ترجمه</summary>
         <div className="batch-actions" aria-label="عملیات ترجمهٔ گروهی">
           <button className="batch-primary" onClick={runOnlineBatch} disabled={isTranslating}>{isTranslating ? "در حال پردازش…" : "اجرای آزمایشی ۵ نام نخست"}</button>
           <button onClick={runDemoBatch} disabled={isTranslating || !uniqueQueue.length}>اجرای نمونه</button>
-          <button onClick={exportSqlPatch}>خروجی SQL</button>
         </div>
+        </details>
         <div className="result-summary">نمایش {results.length.toLocaleString("fa-IR")} نتیجهٔ نخست</div>
         <div className="record-list">{results.map((feature) => <button key={feature.id}
           className={`record-card ${selected?.id === feature.id ? "is-selected" : ""}`} onClick={() => focusFeature(feature)}>

@@ -17,7 +17,7 @@ ENV NODE_ENV=production \
 WORKDIR /app
 
 COPY --from=build --chown=node:node /app/dist/standalone ./
-# Vinext 1.0.0-beta.2 does not yet copy its React peer dependencies into
+# Vinext does not yet copy its React peer dependencies into
 # standalone output, so keep the required production peers explicit.
 COPY --from=build --chown=node:node /app/node_modules/react ./node_modules/react
 COPY --from=build --chown=node:node /app/node_modules/react-dom ./node_modules/react-dom

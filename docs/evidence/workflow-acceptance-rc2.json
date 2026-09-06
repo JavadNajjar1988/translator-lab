@@ -1,0 +1,201 @@
+{
+  "formatVersion": 2,
+  "mode": "isolated-six-case-workflow",
+  "database": "translator_lab_acceptance_release_20260906111147",
+  "automaticApply": false,
+  "before": {
+    "records": 5,
+    "uniqueNames": 5,
+    "newNames": 4,
+    "requestedEdits": 1
+  },
+  "run": {
+    "startedAt": "2026-09-06T07:41:51.004Z",
+    "finishedAt": "2026-09-06T07:41:52.636Z",
+    "status": "applied",
+    "apply": true,
+    "summary": {
+      "records": 5,
+      "uniqueNames": 5,
+      "newNames": 4,
+      "requestedEdits": 1
+    },
+    "translations": [
+      {
+        "key": "[\"Fontvieille\",\"place\",\"suburb\",\"7.4183,43.7278\"]",
+        "sourceName": "Fontvieille",
+        "layer": "place",
+        "className": "suburb",
+        "wikidataId": "",
+        "longitude": 7.4182820000000005,
+        "latitude": 43.727758600539545,
+        "translatedName": "فونتوی یو",
+        "strategy": "mixed",
+        "provider": "approved-memory",
+        "reviewRequired": false
+      },
+      {
+        "key": "[\"Monaco\",\"place\",\"city\",\"7.4198,43.7311\"]",
+        "sourceName": "Monaco",
+        "layer": "place",
+        "className": "city",
+        "wikidataId": "",
+        "longitude": 7.419757599999999,
+        "latitude": 43.73114240053948,
+        "translatedName": "موناکو",
+        "strategy": "mixed",
+        "provider": "approved-memory",
+        "reviewRequired": false
+      },
+      {
+        "key": "[\"Observatoire Cartographique Alpha\",\"poi\",\"museum\",\"\"]",
+        "sourceName": "Observatoire Cartographique Alpha",
+        "layer": "poi",
+        "className": "museum",
+        "wikidataId": "",
+        "longitude": 7.420113112974987,
+        "latitude": 43.731336484611745,
+        "translatedName": "رصدخانه نقشه‌نگاری آلفا",
+        "strategy": "mixed",
+        "provider": "local:qwen/qwen3.5-9b",
+        "nameKind": "proper",
+        "properCore": "Observatoire Cartographique Alpha",
+        "sourceScript": {
+          "dominantScript": "latin",
+          "scripts": [
+            "latin"
+          ],
+          "counts": {
+            "latin": 31
+          },
+          "letters": 31,
+          "mixed": false,
+          "confidence": 1,
+          "supported": true,
+          "candidateLanguages": [
+            "cs",
+            "de",
+            "en",
+            "es",
+            "fr",
+            "hu",
+            "id",
+            "it",
+            "ms",
+            "nl",
+            "pl",
+            "pt",
+            "ro",
+            "tr",
+            "vi"
+          ],
+          "requiresLanguageMetadata": false
+        },
+        "reviewRequired": true
+      },
+      {
+        "key": "[\"Avenue du Port\",\"transportation_name\",\"minor\",\"\"]",
+        "sourceName": "Avenue du Port",
+        "layer": "transportation_name",
+        "className": "minor",
+        "wikidataId": "",
+        "longitude": 7.4138922,
+        "latitude": 43.727103500539556,
+        "translatedName": "خیابان بندر",
+        "strategy": "mixed",
+        "provider": "approved-memory",
+        "reviewRequired": false
+      },
+      {
+        "key": "[\"Fontaine Roseraie Princesse Grace Renamed\",\"water_name_detail\",\"lake\",\"Q99010838\"]",
+        "sourceName": "Fontaine Roseraie Princesse Grace Renamed",
+        "layer": "water_name_detail",
+        "className": "lake",
+        "wikidataId": "Q99010838",
+        "longitude": 7.419278485481369,
+        "latitude": 43.72725660770591,
+        "translatedName": "فوارۀ باغ رز پرنسس گریس",
+        "strategy": "mixed",
+        "provider": "approved-identity-memory",
+        "reviewRequired": false,
+        "automaticApproval": "client-approved-identity"
+      }
+    ],
+    "persistence": {
+      "updated": 4,
+      "conflicts": 0,
+      "missing": 0,
+      "reviewRequired": 1,
+      "policySkipped": 0
+    }
+  },
+  "after": {
+    "records": 1,
+    "uniqueNames": 1,
+    "newNames": 1,
+    "requestedEdits": 0
+  },
+  "rows": [
+    {
+      "osm_id": "835459958",
+      "acceptance_case": "renamed_identity",
+      "source_name": "Fontaine Roseraie Princesse Grace Renamed",
+      "translated_name": "فوارۀ باغ رز پرنسس گریس",
+      "provider": "approved-identity-memory",
+      "edit_remaining": false
+    },
+    {
+      "osm_id": "-910000000001",
+      "acceptance_case": "known_new",
+      "source_name": "Avenue du Port",
+      "translated_name": "خیابان بندر",
+      "provider": "approved-memory",
+      "edit_remaining": false
+    },
+    {
+      "osm_id": "-910000000002",
+      "acceptance_case": "requested_edit",
+      "source_name": "Monaco",
+      "translated_name": "موناکو",
+      "provider": "approved-memory",
+      "edit_remaining": false
+    },
+    {
+      "osm_id": "-910000000003",
+      "acceptance_case": "missing_source",
+      "source_name": "",
+      "translated_name": "",
+      "provider": "",
+      "edit_remaining": false
+    },
+    {
+      "osm_id": "-910000000004",
+      "acceptance_case": "proper_memory",
+      "source_name": "Fontvieille",
+      "translated_name": "فونتوی یو",
+      "provider": "approved-memory",
+      "edit_remaining": false
+    },
+    {
+      "osm_id": "-910000000005",
+      "acceptance_case": "model_new",
+      "source_name": "Observatoire Cartographique Alpha",
+      "translated_name": "",
+      "provider": "",
+      "edit_remaining": false
+    }
+  ],
+  "checks": {
+    "missingSourceSkipped": true,
+    "knownNewApplied": true,
+    "requestedEditApplied": true,
+    "properMemoryApplied": true,
+    "modelWasInvoked": true,
+    "modelRequiresReview": true,
+    "modelWasNotPersisted": true,
+    "modelRemainsQueued": true,
+    "renamedIdentityApplied": true,
+    "renamedIdentityUsedApprovedMemory": true
+  },
+  "passed": true
+}

@@ -25,7 +25,7 @@ pwsh -File scripts\run_release_acceptance.ps1
 گزارش در پوشهٔ `outputs/acceptance` ساخته می‌شود و باید مقدار `passed` برابر با `true` داشته باشد. برای بررسی جداگانهٔ چرخهٔ هویت نیز می‌توان پایگاه پذیرش مستقلی ساخت و این فرمان را با نشانی همان پایگاه اجرا کرد:
 
 ```powershell
-node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts\run_identity_cycle_acceptance.mjs --output work\model-evaluations\identity-cycle-acceptance-rc1.json
+node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts\run_identity_cycle_acceptance.mjs --output work\model-evaluations\identity-cycle-acceptance-release.json
 ```
 
 پیش از فعال‌سازی در محیط اصلی، یک نسخهٔ پشتیبان تازه تهیه شود.

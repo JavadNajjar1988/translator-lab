@@ -18,7 +18,7 @@ test("صفحه اصلی محیط کنترل را رندر می‌کند", async 
   const response = await app.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), bindings, context);
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /آزمایشگاه ترجمه/);
+  assert.match(html, /سامانه مترجم عوارض نقشه/);
   assert.match(html, /کنترل رکوردها/);
   assert.match(html, /پویشگر ترجمه/);
   assert.match(html, /حالت اجرا/);

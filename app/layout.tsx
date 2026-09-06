@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import "@fontsource-variable/vazirmatn";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "آزمایشگاه ترجمه نام‌های نقشه",
+  title: "سامانه مترجم عوارض نقشه",
   description: "محیط محلی کنترل ترجمه عوارض نقشه",
   icons: { icon: "/favicon.svg" },
 };

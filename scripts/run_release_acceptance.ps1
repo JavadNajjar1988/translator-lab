@@ -6,14 +6,14 @@ $ErrorActionPreference = "Stop"
 $projectDirectory = Split-Path -Parent $PSScriptRoot
 $containerName = "translator-lab-postgis"
 $timestamp = (Get-Date).ToString("yyyyMMdd-HHmmss", [System.Globalization.CultureInfo]::InvariantCulture)
-$acceptanceDatabase = "translator_lab_acceptance_rc1_" + $timestamp.Replace("-", "")
+$acceptanceDatabase = "translator_lab_acceptance_release_" + $timestamp.Replace("-", "")
 $reportPath = if ($OutputPath) {
     [System.IO.Path]::GetFullPath($OutputPath)
 } else {
     Join-Path $projectDirectory "outputs\acceptance\workflow-acceptance-$timestamp.json"
 }
 
-if ($acceptanceDatabase -notmatch '^translator_lab_acceptance_rc1_[0-9]{14}$') {
+if ($acceptanceDatabase -notmatch '^translator_lab_acceptance_release_[0-9]{14}$') {
     throw "نام پایگاه پذیرش معتبر نیست."
 }
 
